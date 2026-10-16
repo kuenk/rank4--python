@@ -9,3 +9,35 @@ def package_dependency_resolver(packages: dict[str, list[str]]) -> list[str]:
     - Manejar entradas vacías y cadenas de dependencias aisladas
     - Ignorar referencias a paquetes que no están en el diccionario de entrada
     """
+
+    degree = {}
+    dependents = {}
+    for clave in packages.keys():
+        degree[clave] = 0
+        dependents[clave] = []
+
+    for p, deps in packages.items():
+        for d in set(deps):
+            if d not in packages:
+                continue
+            degree[p] += 1
+            dependents[d].append(p)
+
+    ready = []
+    result = []
+    for nombre, contador in degree.items():
+        if contador == 0:
+            ready.append(nombre)
+
+    while ready:
+        ready.sort()
+        current = ready.pop(0)
+        result.append(current)
+        for i in dependents[current]:
+            degree[i] -= 1
+            if degree[i] == 0:
+                ready.append(i)
+
+    if len(result) == len(packages):
+        return result
+    return []
